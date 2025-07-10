@@ -2,6 +2,8 @@ package com.sagedemo.demo.purchasing.service;
 
 import com.sagedemo.demo.inventory.entity.Product;
 import com.sagedemo.demo.inventory.repository.ProductRepository;
+import com.sagedemo.demo.inventory.repository.WarehouseRepository;
+import com.sagedemo.demo.inventory.service.InventoryService;
 import com.sagedemo.demo.purchasing.dto.PurchaseOrderDTO;
 import com.sagedemo.demo.purchasing.dto.PurchaseOrderItemDTO;
 import com.sagedemo.demo.purchasing.entity.PurchaseOrder;
@@ -23,10 +25,14 @@ public class PurchaseOrderService {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
-    public PurchaseOrderService(PurchaseOrderRepository purchaseOrderRepository, SupplierRepository supplierRepository, ProductRepository productRepository) {
+    private final WarehouseRepository warehouseRepository;
+    private final InventoryService inventoryService;
+    public PurchaseOrderService(PurchaseOrderRepository purchaseOrderRepository, SupplierRepository supplierRepository, ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryService inventoryService) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.supplierRepository = supplierRepository;
         this.productRepository = productRepository;
+        this.warehouseRepository = warehouseRepository;
+        this.inventoryService = inventoryService;
     }
     @Transactional
     public PurchaseOrderDTO createPurchaseOrder(PurchaseOrderDTO dto) {
@@ -37,6 +43,8 @@ public class PurchaseOrderService {
         order.setOrderNumber("PO-" + System.currentTimeMillis());
         order.setItems(new ArrayList<>());
         BigDecimal total = BigDecimal.ZERO;
+        // For demo: always use the first warehouse
+        var warehouse = warehouseRepository.findAll().stream().findFirst().orElseThrow(() -> new RuntimeException("No warehouse found"));
         for (PurchaseOrderItemDTO itemDTO : dto.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
             PurchaseOrderItem item = new PurchaseOrderItem();
@@ -47,6 +55,8 @@ public class PurchaseOrderService {
             item.setPurchaseOrder(order);
             order.getItems().add(item);
             total = total.add(item.getTotalPrice());
+            // Inventory integration: add stock
+            inventoryService.moveStock(product.getId(), null, warehouse.getId(), item.getQuantity(), "PO:" + order.getOrderNumber());
         }
         order.setTotalAmount(total);
         PurchaseOrder saved = purchaseOrderRepository.save(order);
