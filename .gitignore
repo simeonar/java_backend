@@ -4,6 +4,8 @@ docs/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+INSTRUCTIONS.md
+PROGRESS.md
 
 ### STS ###
 .apt_generated
