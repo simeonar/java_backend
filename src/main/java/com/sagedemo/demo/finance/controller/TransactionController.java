@@ -1,7 +1,10 @@
 package com.sagedemo.demo.finance.controller;
 
+import com.sagedemo.demo.finance.dto.TransactionDTO;
 import com.sagedemo.demo.finance.entity.Transaction;
+import com.sagedemo.demo.finance.entity.Account;
 import com.sagedemo.demo.finance.service.TransactionService;
+import com.sagedemo.demo.finance.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -11,10 +14,12 @@ import java.util.Optional;
 @RequestMapping("/api/finance/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
+    private final AccountService accountService;
 
     @Autowired
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService, AccountService accountService) {
         this.transactionService = transactionService;
+        this.accountService = accountService;
     }
 
     @GetMapping
@@ -29,7 +34,19 @@ public class TransactionController {
     }
 
     @PostMapping
-    public Transaction createTransaction(@RequestBody Transaction transaction) {
+    public Transaction createTransaction(@RequestBody TransactionDTO dto) {
+        // Map DTO to entity
+        Account debit = accountService.getAccountById(dto.getDebitAccountId())
+                .orElseThrow(() -> new RuntimeException("Debit account not found"));
+        Account credit = accountService.getAccountById(dto.getCreditAccountId())
+                .orElseThrow(() -> new RuntimeException("Credit account not found"));
+        Transaction transaction = new Transaction();
+        transaction.setTransactionDate(dto.getTransactionDate());
+        transaction.setDescription(dto.getDescription());
+        transaction.setDebitAmount(dto.getAmount());
+        transaction.setCreditAmount(dto.getAmount());
+        transaction.setDebitAccount(debit);
+        transaction.setCreditAccount(credit);
         return transactionService.createTransaction(transaction);
     }
 
