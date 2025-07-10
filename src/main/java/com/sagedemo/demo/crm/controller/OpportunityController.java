@@ -2,10 +2,10 @@ package com.sagedemo.demo.crm.controller;
 
 import com.sagedemo.demo.crm.entity.Opportunity;
 import com.sagedemo.demo.crm.service.OpportunityService;
+import com.sagedemo.demo.common.api.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-
 import java.util.List;
 
 @RestController
@@ -18,35 +18,35 @@ public class OpportunityController {
     }
 
     @GetMapping
-    public List<Opportunity> getAll() {
-        return opportunityService.findAll();
+    public ApiResponse<List<Opportunity>> getAll() {
+        return ApiResponse.ok(opportunityService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Opportunity> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Opportunity>> getById(@PathVariable Long id) {
         return opportunityService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(o -> ResponseEntity.ok(ApiResponse.ok(o)))
+                .orElse(ResponseEntity.ok(ApiResponse.error("Opportunity not found", "NOT_FOUND")));
     }
 
     @PostMapping
-    public Opportunity create(@Valid @RequestBody Opportunity opportunity) {
-        return opportunityService.save(opportunity);
+    public ApiResponse<Opportunity> create(@Valid @RequestBody Opportunity opportunity) {
+        return ApiResponse.ok(opportunityService.save(opportunity));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Opportunity> update(@PathVariable Long id, @Valid @RequestBody Opportunity opportunity) {
+    public ResponseEntity<ApiResponse<Opportunity>> update(@PathVariable Long id, @Valid @RequestBody Opportunity opportunity) {
         return opportunityService.update(id, opportunity)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(updated -> ResponseEntity.ok(ApiResponse.ok(updated)))
+                .orElse(ResponseEntity.ok(ApiResponse.error("Opportunity not found", "NOT_FOUND")));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         if (opportunityService.delete(id)) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(ApiResponse.ok(null));
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(ApiResponse.error("Opportunity not found", "NOT_FOUND"));
         }
     }
 }

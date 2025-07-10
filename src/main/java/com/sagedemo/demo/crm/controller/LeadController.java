@@ -2,10 +2,10 @@ package com.sagedemo.demo.crm.controller;
 
 import com.sagedemo.demo.crm.entity.Lead;
 import com.sagedemo.demo.crm.service.LeadService;
+import com.sagedemo.demo.common.api.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-
 import java.util.List;
 
 @RestController
@@ -18,35 +18,35 @@ public class LeadController {
     }
 
     @GetMapping
-    public List<Lead> getAll() {
-        return leadService.findAll();
+    public ApiResponse<List<Lead>> getAll() {
+        return ApiResponse.ok(leadService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Lead> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Lead>> getById(@PathVariable Long id) {
         return leadService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(lead -> ResponseEntity.ok(ApiResponse.ok(lead)))
+                .orElse(ResponseEntity.ok(ApiResponse.error("Lead not found", "NOT_FOUND")));
     }
 
     @PostMapping
-    public Lead create(@Valid @RequestBody Lead lead) {
-        return leadService.save(lead);
+    public ApiResponse<Lead> create(@Valid @RequestBody Lead lead) {
+        return ApiResponse.ok(leadService.save(lead));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Lead> update(@PathVariable Long id, @Valid @RequestBody Lead lead) {
+    public ResponseEntity<ApiResponse<Lead>> update(@PathVariable Long id, @Valid @RequestBody Lead lead) {
         return leadService.update(id, lead)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(updated -> ResponseEntity.ok(ApiResponse.ok(updated)))
+                .orElse(ResponseEntity.ok(ApiResponse.error("Lead not found", "NOT_FOUND")));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         if (leadService.delete(id)) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(ApiResponse.ok(null));
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(ApiResponse.error("Lead not found", "NOT_FOUND"));
         }
     }
 }
