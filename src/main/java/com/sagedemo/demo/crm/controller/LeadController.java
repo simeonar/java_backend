@@ -4,6 +4,7 @@ import com.sagedemo.demo.crm.entity.Lead;
 import com.sagedemo.demo.crm.service.LeadService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -29,12 +30,12 @@ public class LeadController {
     }
 
     @PostMapping
-    public Lead create(@RequestBody Lead lead) {
+    public Lead create(@Valid @RequestBody Lead lead) {
         return leadService.save(lead);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Lead> update(@PathVariable Long id, @RequestBody Lead lead) {
+    public ResponseEntity<Lead> update(@PathVariable Long id, @Valid @RequestBody Lead lead) {
         return leadService.update(id, lead)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

@@ -4,6 +4,7 @@ import com.sagedemo.demo.crm.entity.Opportunity;
 import com.sagedemo.demo.crm.service.OpportunityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -29,12 +30,12 @@ public class OpportunityController {
     }
 
     @PostMapping
-    public Opportunity create(@RequestBody Opportunity opportunity) {
+    public Opportunity create(@Valid @RequestBody Opportunity opportunity) {
         return opportunityService.save(opportunity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Opportunity> update(@PathVariable Long id, @RequestBody Opportunity opportunity) {
+    public ResponseEntity<Opportunity> update(@PathVariable Long id, @Valid @RequestBody Opportunity opportunity) {
         return opportunityService.update(id, opportunity)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

@@ -4,6 +4,7 @@ import com.sagedemo.demo.crm.entity.Activity;
 import com.sagedemo.demo.crm.service.ActivityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -29,12 +30,12 @@ public class ActivityController {
     }
 
     @PostMapping
-    public Activity create(@RequestBody Activity activity) {
+    public Activity create(@Valid @RequestBody Activity activity) {
         return activityService.save(activity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Activity> update(@PathVariable Long id, @RequestBody Activity activity) {
+    public ResponseEntity<Activity> update(@PathVariable Long id, @Valid @RequestBody Activity activity) {
         return activityService.update(id, activity)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
