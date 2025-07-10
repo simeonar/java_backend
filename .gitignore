@@ -6,6 +6,7 @@ docs/
 !**/src/test/**/target/
 INSTRUCTIONS.md
 PROGRESS.md
+PROGRESS_PHASE2.md
 
 ### STS ###
 .apt_generated
