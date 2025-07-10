@@ -35,3 +35,4 @@ build/
 
 ### VS Code ###
 .vscode/
+TEST_PROGRESS.md
