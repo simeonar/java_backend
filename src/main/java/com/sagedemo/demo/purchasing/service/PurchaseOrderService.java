@@ -13,6 +13,9 @@ import com.sagedemo.demo.purchasing.repository.PurchaseOrderRepository;
 import com.sagedemo.demo.purchasing.repository.SupplierRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.sagedemo.demo.finance.service.TransactionService;
+import com.sagedemo.demo.finance.dto.TransactionDTO;
+import com.sagedemo.demo.finance.util.FinanceAccountConstants;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,12 +30,14 @@ public class PurchaseOrderService {
     private final ProductRepository productRepository;
     private final WarehouseRepository warehouseRepository;
     private final InventoryService inventoryService;
-    public PurchaseOrderService(PurchaseOrderRepository purchaseOrderRepository, SupplierRepository supplierRepository, ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryService inventoryService) {
+    private final TransactionService transactionService;
+    public PurchaseOrderService(PurchaseOrderRepository purchaseOrderRepository, SupplierRepository supplierRepository, ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryService inventoryService, TransactionService transactionService) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.supplierRepository = supplierRepository;
         this.productRepository = productRepository;
         this.warehouseRepository = warehouseRepository;
         this.inventoryService = inventoryService;
+        this.transactionService = transactionService;
     }
     @Transactional
     public PurchaseOrderDTO createPurchaseOrder(PurchaseOrderDTO dto) {
@@ -60,6 +65,14 @@ public class PurchaseOrderService {
         }
         order.setTotalAmount(total);
         PurchaseOrder saved = purchaseOrderRepository.save(order);
+        // Finance integration: create transaction (Purchasing Expense <- Bank)
+        TransactionDTO tx = new TransactionDTO();
+        tx.setTransactionDate(order.getOrderDate().atStartOfDay());
+        tx.setDescription("Purchase Order " + order.getOrderNumber());
+        tx.setAmount(order.getTotalAmount());
+        tx.setDebitAccountId(FinanceAccountConstants.PURCHASING_EXPENSE_ACCOUNT_ID);
+        tx.setCreditAccountId(FinanceAccountConstants.BANK_ACCOUNT_ID);
+        transactionService.createTransaction(tx);
         return toDto(saved);
     }
     @Transactional(readOnly = true)

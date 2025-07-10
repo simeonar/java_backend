@@ -1,5 +1,6 @@
 package com.sagedemo.demo.finance.service;
 
+import com.sagedemo.demo.finance.dto.TransactionDTO;
 import com.sagedemo.demo.finance.entity.Transaction;
 import com.sagedemo.demo.finance.repository.TransactionRepository;
 import com.sagedemo.demo.finance.repository.AccountRepository;
@@ -20,6 +21,21 @@ public class TransactionService {
     public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+    }
+
+        public Transaction createTransaction(TransactionDTO dto) {
+        Account debit = accountRepository.findById(dto.getDebitAccountId())
+                .orElseThrow(() -> new RuntimeException("Debit account not found"));
+        Account credit = accountRepository.findById(dto.getCreditAccountId())
+                .orElseThrow(() -> new RuntimeException("Credit account not found"));
+        Transaction transaction = new Transaction();
+        transaction.setTransactionDate(dto.getTransactionDate());
+        transaction.setDescription(dto.getDescription());
+        transaction.setDebitAmount(dto.getAmount());
+        transaction.setCreditAmount(dto.getAmount());
+        transaction.setDebitAccount(debit);
+        transaction.setCreditAccount(credit);
+        return createTransaction(transaction);
     }
 
     public List<Transaction> getAllTransactions() {
