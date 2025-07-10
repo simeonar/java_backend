@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: sage_user
       POSTGRES_PASSWORD: sage_password
     ports:
-      - "5432:5432"
+      - "5445:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     restart: unless-stopped
