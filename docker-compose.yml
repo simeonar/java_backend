@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: sage_erp_postgres
+    environment:
+      POSTGRES_DB: sage_erp
+      POSTGRES_USER: sage_user
+      POSTGRES_PASSWORD: sage_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
